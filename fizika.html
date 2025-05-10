@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Физика 5–9 класс — Повторение формул</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #0f0f0f;
+      color: #eaeaea;
+      text-align: center;
+      padding: 30px;
+      box-sizing: border-box;
+    }
+    h1 {
+      color: #88c0d0;
+      font-size: 2.4rem;
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+    #timer {
+      font-size: 1.2rem;
+      color: #d08770;
+      margin-top: 5px;
+    }
+    #progress-bar {
+      width: 100%;
+      background-color: #2e3440;
+      border-radius: 15px;
+      margin: 25px 0;
+      height: 18px;
+      overflow: hidden;
+    }
+    #progress {
+      height: 100%;
+      background-color: #5e81ac;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    #question {
+      font-size: 1.8rem;
+      margin: 30px 0;
+      color: #eceff4;
+      font-weight: 500;
+    }
+    .btn {
+      display: block;
+      margin: 20px auto;
+      padding: 18px 36px;
+      font-size: 1.3rem;
+      background-color: #434c5e;
+      color: #eceff4;
+      border: none;
+      border-radius: 40px;
+      width: 90%;
+      max-width: 500px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+    .btn:hover {
+      background-color: #81a1c1;
+      transform: translateY(-3px);
+    }
+    .btn:active {
+      transform: translateY(1px);
+    }
+    .correct {
+      background-color: #a3be8c !important;
+    }
+    .wrong {
+      background-color: #bf616a !important;
+    }
+    #answers p {
+      font-size: 1.4rem;
+      color: #eceff4;
+    }
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      #question {
+        font-size: 1.5rem;
+      }
+      .btn {
+        font-size: 1.1rem;
+        padding: 15px 24px;
+      }
+    }
+    @media (max-width: 480px) {
+      body {
+        padding: 15px;
+      }
+      h1 {
+        font-size: 1.7rem;
+      }
+      .btn {
+        font-size: 1rem;
+        padding: 12px 18px;
+      }
+      #question {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Тренажёр по физике 5–9 класс</h1>
+<div id="timer">Прошло времени: 00:00</div>
+<div id="progress-bar"><div id="progress"></div></div>
+<div id="question">Загрузка вопроса...</div>
+<div id="answers"></div>
+
+<script>
+const formulas = {
+  "Как найти изменение импульса?": ["Δp = F * Δt", "Δp = m / v", "Δp = a * t", "Δp = F / t"],
+  "Как найти массу тела по плотности и объёму?": ["m = ρ * V", "m = V / ρ", "m = ρ / V", "m = g * V"],
+  "Как найти механическую энергию?": ["E = Eк + Eп", "E = m * g * h", "E = m * v²", "E = m * a"],
+  "Как найти частоту колебаний?": ["ν = 1 / T", "ν = T", "ν = 2π / T", "ν = T / 2π"],
+  "Как найти период колебаний?": ["T = 1 / ν", "T = ν", "T = 2π / ν", "T = ν / 2π"],
+  "Как найти длину волны?": ["λ = v * T", "λ = v / T", "λ = T / v", "λ = v² * T"],
+  "Как найти скорость волны?": ["v = λ * ν", "v = λ / ν", "v = λ² * ν", "v = ν / λ"],
+  "Как найти силу упругости?": ["Fупр = k * x", "Fупр = x / k", "Fупр = k / x", "Fупр = k * x²"],
+  "Как найти давление жидкости на глубине?": ["p = ρ * g * h", "p = ρ / h", "p = g / h", "p = ρ * h / g"],
+  "Как найти изменение внутренней энергии?": ["ΔU = Q + A", "ΔU = Q - A", "ΔU = A - Q", "ΔU = Q * A"],
+  "Как найти силу тока через сопротивление по закону Джоуля-Ленца?": ["Q = I² * R * t", "Q = I * R * t", "Q = I² * t / R", "Q = I * t"],
+  "Как найти механическую работу?": ["A = F * s", "A = F / s", "A = s / F", "A = F * s²"],
+  "Как найти ёмкость конденсатора?": ["C = Q / U", "C = Q * U", "C = U / Q", "C = Q * U²"],
+  "Как найти показатель преломления?": ["n = c / v", "n = v / c", "n = c² / v", "n = v² / c"],
+  "Как найти оптическую силу линзы?": ["F = 1 / f", "F = f / 1", "F = 1 / (f²)", "F = f"],
+  "Как работает формула тонкой линзы?": ["1 / f = 1 / d_o + 1 / d_i", "1 / f = 1 / d_o - 1 / d_i", "1 / f = d_o / d_i", "1 / f = d_o * d_i"],
+  "Как найти силу тока?": ["I = U / R", "I = R * U", "I = U * R", "I = R² / U"],
+  "Как найти напряжение?": ["U = I * R", "U = I / R", "U = I * R²", "U = R / I"],
+  "Как найти сопротивление?": ["R = U / I", "R = I / U", "R = U * I", "R = I² / U"],
+  "Как найти мощность электрического тока?": ["P = I * U", "P = I² * R", "P = U² / R", "P = R * U"],
+  "Как найти работу тока?": ["A = U * I * t", "A = U * t", "A = I² * R * t", "A = I * t"],
+  "Как найти количество теплоты?": ["Q = c * m * Δt", "Q = c * m / Δt", "Q = c * Δt", "Q = m * Δt"],
+  "Как найти силу тяжести?": ["F = m * g", "F = m / g", "F = g / m", "F = m * g²"],
+  "Как найти плотность вещества?": ["ρ = m / V", "ρ = V / m", "ρ = m * V", "ρ = m * g"],
+  "Как найти ускорение?": ["a = (v - v₀) / t", "a = v / t", "a = (v² - v₀²) / 2", "a = v * t"],
+  "Как найти кинетическую энергию?": ["Eк = (m * v²) / 2", "Eк = m * v", "Eк = (m * v) / 2", "Eк = m * v²"],
+  "Как найти потенциальную энергию?": ["Eп = m * g * h", "Eп = m * g", "Eп = g * h", "Eп = m * h"],
+  "Как найти давление?": ["p = F / S", "p = F * S", "p = S / F", "p = F + S"],
+  "Как найти КПД?": ["η = (A_полезная / A_затраченная) * 100%", "η = (A_затраченная / A_полезная) * 100%", "η = A * t", "η = P / t"],
+  "Как найти силу трения?": ["Fтр = μ * N", "Fтр = N / μ", "Fтр = μ / N", "Fтр = m * g * μ"],
+  "Как найти заряд?": ["q = I * t", "q = U * t", "q = I / t", "q = U / R"],
+  "Как найти импульс тела?": ["p = m * v", "p = m / v", "p = v / m", "p = m * a"],
+  "Как найти силу Архимеда?": ["Fа = ρ * g * V", "Fа = ρ / V", "Fа = ρ * V", "Fа = m * g"],
+  "Как работает закон отражения света?": ["угол падения = угол отражения", "угол падения = 2 * угол отражения"]
+};
+
+let questions = Object.entries(formulas);
+let questionIndex = 0;
+let correctAnswer = "";
+let score = 0;
+let timerSeconds = 0;
+let interval = setInterval(() => {
+  timerSeconds++;
+  let mins = Math.floor(timerSeconds / 60);
+  let secs = timerSeconds % 60;
+  document.getElementById("timer").textContent = `Прошло времени: ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}, 1000);
+
+shuffleArray(questions);
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function loadQuestion() {
+  if (questionIndex >= questions.length) return finishQuiz();
+  const [q, answers] = questions[questionIndex];
+  correctAnswer = answers[0];
+  const options = [...answers];
+  shuffleArray(options);
+
+  document.getElementById("question").textContent = `${questionIndex + 1}. ${q}`;
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = "";
+
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.textContent = opt;
+    btn.onclick = () => checkAnswer(btn, opt);
+    answersDiv.appendChild(btn);
+  });
+
+  const progress = ((questionIndex + 1) / questions.length) * 100;
+  document.getElementById("progress").style.width = progress + "%";
+}
+
+function checkAnswer(button, selected) {
+  const buttons = document.querySelectorAll(".btn");
+  buttons.forEach(btn => btn.disabled = true);
+
+  if (selected === correctAnswer) {
+    score++;
+    button.classList.add("correct");
+  } else {
+    button.classList.add("wrong");
+    if (navigator.vibrate) navigator.vibrate(300);
+    buttons.forEach(btn => {
+      if (btn.textContent === correctAnswer) btn.classList.add("correct");
+    });
+  }
+
+  setTimeout(() => {
+    questionIndex++;
+    loadQuestion();
+  }, 800);
+}
+
+function finishQuiz() {
+  clearInterval(interval);
+  const mins = Math.floor(timerSeconds / 60);
+  const secs = timerSeconds % 60;
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = `
+    <p style="font-size: 1.4rem;">Вы ответили правильно на ${score} из ${questions.length} вопросов.<br>Время: ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}</p>
+    <button class="btn" onclick="location.reload()">Пройти ещё раз</button>
+  `;
+  document.getElementById("question").textContent = "Результат";
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
